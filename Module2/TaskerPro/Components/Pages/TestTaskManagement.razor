@@ -1,0 +1,88 @@
+@rendermode InteractiveServer
+
+@page "/testtaskmanagement"
+@using TaskerPro.Services
+@using TaskerPro.Models
+@inject TaskService TaskService
+@inject AuthenticationStateProvider AuthProvider
+
+
+<h3>Test Task Management</h3>
+
+<input @bind="newTaskTitle" placeholder="New task title" />
+<button @onclick="AddTask">Add Task</button>
+
+<p>Current User ID: @userId</p>
+
+@if (tasks.Any())
+{
+    <ul>
+        @foreach (var task in tasks)
+        {
+            <li>
+                @task.Title (@(task.IsCompleted ? "✅" : "❌"))
+                <button @onclick="() => MarkTaskComplete(task.Id)">Mark Complete</button>
+                <button @onclick="() => UncheckTask(task.Id)">Mark Incomplete</button>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>No tasks found.</p>
+}
+
+@code {
+    string newTaskTitle = "";
+    string userId = "";
+    List<TaskItem> tasks = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            userId = user.Identity.Name ?? "";
+            tasks = TaskService.GetTasksForUser(userId);
+        }
+    }
+
+    async Task AddTask()
+    {
+        Console.WriteLine("Clicked Add Task");
+
+        if (!string.IsNullOrWhiteSpace(newTaskTitle))
+        {
+            TaskService.AddTask(new TaskItem
+            {
+                Title = newTaskTitle,
+                IsCompleted = false,
+                UserId = userId
+            });
+
+            Console.WriteLine($"Task added for user: {userId}, title: {newTaskTitle}");
+
+            tasks = TaskService.GetTasksForUser(userId);
+            Console.WriteLine($"Task count for {userId}: {tasks.Count}");
+
+            newTaskTitle = "";
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    async Task MarkTaskComplete(int taskId)
+    {
+        TaskService.CompleteTask(taskId);
+        tasks = TaskService.GetTasksForUser(userId);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    async Task UncheckTask(int taskId)
+    {
+        TaskService.UncheckTask(taskId);
+        tasks = TaskService.GetTasksForUser(userId);
+        await InvokeAsync(StateHasChanged);
+    }
+} 
