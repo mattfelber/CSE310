@@ -1,0 +1,63 @@
+@page "/animal-demo"
+@using TaskerPro.Models
+
+<h3>Animal Inheritance Demo</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h4>Dog Example</h4>
+            </div>
+            <div class="card-body">
+                @if (dog != null)
+                {
+                    <p>@dog.MakeSound()</p>
+                    <p>@dog.Sleep()</p>
+                    <p>@dog.WagTail()</p>
+                    <p>@dog.Play()</p>
+                    <p>@dog.Fetch()</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h4>Cat Example</h4>
+            </div>
+            <div class="card-body">
+                @if (cat != null)
+                {
+                    <p>@cat.MakeSound()</p>
+                    <p>@cat.Sleep()</p>
+                    <p>@cat.Purr()</p>
+                    <p>@cat.Play()</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private Dog? dog;
+    private Cat? cat;
+
+    protected override void OnInitialized()
+    {
+        // Create a dog
+        dog = new Dog
+        {
+            Name = "Buddy",
+            Age = 3
+        };
+
+        // Create a cat
+        cat = new Cat
+        {
+            Name = "Whiskers",
+            Age = 2
+        };
+    }
+} 
